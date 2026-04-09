@@ -224,7 +224,108 @@
     .status-entregue { background: rgba(16,185,129,0.18); color: #6ee7b7; }
     .status-pendente { background: rgba(245,158,11,0.18); color: #fcd34d; }
 
+    .mobile-cards {
+      display: none;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .lavagem-card {
+      background: rgba(12, 22, 40, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .lavagem-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .lavagem-card-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .lavagem-card-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .lavagem-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .lavagem-card-item {
+      background: #0a1424;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .lavagem-card-label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .lavagem-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
     .error-text { color: #fca5a5; font-size: 13px; min-height: 18px; margin-top: 8px; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(12, 22, 40, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+    }
+
+    .modal-title {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
 
     #dayBanner {
       background: #22c55e;
@@ -236,9 +337,114 @@
     }
 
     @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .sidebar { position: relative; height: auto; }
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1200;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        overflow-y: auto;
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .topbar {
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .topbar h1 {
+        font-size: 24px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .grid-form,
+      .summary-grid,
+      .subgrid,
+      .lavagem-card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .card,
+      .summary-item,
+      .mini {
+        padding: 14px;
+      }
+
+      .btn {
+        width: 100%;
+        min-height: 46px;
+      }
+
+      .inline-actions,
+      .top-actions,
+      .table-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 920px;
+      }
+
+      .desktop-table {
+        display: none;
+      }
+
+      .mobile-cards {
+        display: grid;
+      }
+
+      .mobile-toolbar {
+        display: flex !important;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        background: rgba(2, 6, 23, 0.96);
+        backdrop-filter: blur(8px);
+        padding: 10px 0 14px;
+        margin-bottom: 12px;
+        gap: 10px;
+      }
+
+      .mobile-toolbar .btn {
+        width: auto;
+        flex: 1;
+      }
+
+      .sidebar-backdrop {
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1150;
+      }
     }
+      .sidebar { position: relative; height: auto; }
+    
   </style>
 </head>
 <body>
@@ -269,6 +475,22 @@
     </div>
   </div>
 
+  <div id="paymentModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-title">Confirmar pagamento</h3>
+      <p class="muted">Selecione a forma de pagamento do veículo.</p>
+      <div class="modal-actions">
+        <button class="btn btn-success" onclick="confirmarPagamentoSelecionado('Dinheiro')">Dinheiro</button>
+        <button class="btn btn-success" onclick="confirmarPagamentoSelecionado('Pix')">Pix</button>
+        <button class="btn btn-success" onclick="confirmarPagamentoSelecionado('Débito')">Débito</button>
+        <button class="btn btn-success" onclick="confirmarPagamentoSelecionado('Crédito')">Crédito</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" onclick="fecharModalPagamento()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="appLayout" class="layout hidden">
     <aside class="sidebar">
       <div class="brand-wrap">
@@ -286,6 +508,11 @@
     </aside>
 
     <main class="content">
+      <div class="mobile-toolbar hidden" id="mobileToolbar">
+        <button class="btn btn-secondary" onclick="toggleMobileMenu()">Menu</button>
+        <button class="btn btn-primary" onclick="showTab('lavagens', document.querySelector('.menu-btn'))">Lavagens</button>
+      </div>
+      <div id="sidebarBackdrop" class="hidden" onclick="closeMobileMenu()"></div>
       <div id="dayBanner" class="hidden">
         DIA ABERTO: <span id="dayBannerText"></span>
       </div>
@@ -398,7 +625,8 @@
 
         <div class="panel">
           <h2>Lista de lavagens</h2>
-          <table>
+          <div class="mobile-cards" id="lavagensCards"></div>
+          <div class="table-wrap desktop-table"><table>
             <thead>
               <tr>
                 <th>Data</th>
@@ -413,7 +641,7 @@
               </tr>
             </thead>
             <tbody id="lavagensBody"></tbody>
-          </table>
+          </table></div>
         </div>
       </section>
 
@@ -458,7 +686,8 @@
 
         <div class="panel">
           <h2>Resultado do filtro</h2>
-          <table>
+          <div class="mobile-cards" id="filtroLavagensCards"></div>
+          <div class="table-wrap desktop-table"><table>
             <thead>
               <tr>
                 <th>Data</th>
@@ -473,7 +702,7 @@
               </tr>
             </thead>
             <tbody id="filtroLavagensBody"></tbody>
-          </table>
+          </table></div>
         </div>
       </section>
 
@@ -507,7 +736,7 @@
           </div>
           <button class="btn btn-primary" onclick="addDesconto()">Adicionar desconto</button>
         </div>
-        <div class="panel"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Motivo</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="descontosBody"></tbody></table></div>
+        <div class="panel"><div class="table-wrap"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Motivo</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="descontosBody"></tbody></table></div></div>
       </section>
 
       <section id="tab-despesas" class="tab-section hidden admin-only-section">
@@ -521,7 +750,7 @@
           </div>
           <button class="btn btn-primary" onclick="addDespesa()">Adicionar despesa</button>
         </div>
-        <div class="panel"><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="despesasBody"></tbody></table></div>
+        <div class="panel"><div class="table-wrap"><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="despesasBody"></tbody></table></div></div>
       </section>
 
       <section id="tab-mes" class="tab-section hidden admin-only-section">
@@ -535,7 +764,7 @@
             <span>Saldo mês: <strong id="relSaldoMes">R$ 0,00</strong></span>
           </div>
         </div>
-        <div class="panel"><table><thead><tr><th>Data</th><th>Qtd. Lavagens</th><th>Dinheiro</th><th>Pix</th><th>Débito</th><th>Crédito</th><th>Total</th></tr></thead><tbody id="mesBody"></tbody></table></div>
+        <div class="panel"><div class="table-wrap"><table><thead><tr><th>Data</th><th>Qtd. Lavagens</th><th>Dinheiro</th><th>Pix</th><th>Débito</th><th>Crédito</th><th>Total</th></tr></thead><tbody id="mesBody"></tbody></table></div></div>
       </section>
     </main>
   </div>
@@ -567,6 +796,7 @@
     };
 
     const state = {
+      mobileMenuOpen: false,
       currentRole: 'adm',
       dataOperacao: '',
       lavagens: [],
@@ -574,6 +804,7 @@
       descontos: [],
       fechamentos: [],
       editingLavagemId: null,
+      pagamentoTargetId: null,
       filtros: { data: '', status: '', pagamento: '', texto: '' }
     };
 
@@ -747,6 +978,31 @@
       const titles = { lavagens:'Lavagens', filtros:'Filtros', fechamento:'Fechamento Diário', descontos:'Descontos', despesas:'Despesas', mes:'Total Mês' };
       document.getElementById('pageTitle').textContent = titles[tab] || 'Lavagens';
       if (tab === 'fechamento') updatePreviaFechamento();
+      if (window.innerWidth <= 900) closeMobileMenu();
+    }
+
+    function toggleMobileMenu() {
+      state.mobileMenuOpen = !state.mobileMenuOpen;
+      syncMobileMenu();
+    }
+
+    function closeMobileMenu() {
+      state.mobileMenuOpen = false;
+      syncMobileMenu();
+    }
+
+    function syncMobileMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!sidebar || !backdrop) return;
+      if (window.innerWidth <= 900) {
+        sidebar.classList.toggle('mobile-open', state.mobileMenuOpen);
+        backdrop.classList.toggle('hidden', !state.mobileMenuOpen);
+      } else {
+        sidebar.classList.remove('mobile-open');
+        backdrop.classList.add('hidden');
+        state.mobileMenuOpen = false;
+      }
     }
 
     async function definirDataOperacao() {
@@ -900,20 +1156,81 @@
         '<td>' + escapeHtml(item.formaPagamento || '-') + '</td>' +
         '<td>' + escapeHtml(item.horas) + '</td>' +
         '<td>' + escapeHtml(formatBRL(item.total)) + '</td>' +
-        '<td><div class="table-actions"><button class="btn btn-secondary" onclick="editarLavagem(' + item.id + ')">Editar</button><button class="btn btn-danger" onclick="removeItem(\'lavagens\',' + item.id + ')">Excluir</button></div></td>' +
+        '<td><div class="table-actions"><button class="btn btn-secondary" onclick="editarLavagem(' + item.id + ')">Editar</button><button class="btn btn-success" onclick="abrirConfirmacaoPagamento(' + item.id + ')">Confirmar pagamento</button><button class="btn btn-danger" onclick="removeItem(\'lavagens\',' + item.id + ')">Excluir</button></div></td>' +
         '</tr>';
+    }
+
+    function buildLavagemCard(item) {
+      return '<div class="lavagem-card">' +
+        '<div class="lavagem-card-header">' +
+          '<div>' +
+            '<div class="lavagem-card-title">' + escapeHtml(item.modelo) + '</div>' +
+            '<div class="lavagem-card-subtitle">Placa: ' + escapeHtml(item.placa) + '</div>' +
+          '</div>' +
+          '<span class="status-chip ' + statusClass(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span>' +
+        '</div>' +
+        '<div class="lavagem-card-grid">' +
+          '<div class="lavagem-card-item"><span class="lavagem-card-label">Data</span>' + escapeHtml(item.data) + '</div>' +
+          '<div class="lavagem-card-item"><span class="lavagem-card-label">Serviço</span>' + escapeHtml(item.servico) + '</div>' +
+          '<div class="lavagem-card-item"><span class="lavagem-card-label">Pagamento</span>' + escapeHtml(item.formaPagamento || '-') + '</div>' +
+          '<div class="lavagem-card-item"><span class="lavagem-card-label">Entrega</span>' + escapeHtml(item.horas) + '</div>' +
+          '<div class="lavagem-card-item"><span class="lavagem-card-label">Total</span>' + escapeHtml(formatBRL(item.total)) + '</div>' +
+        '</div>' +
+        '<div class="lavagem-card-actions">' +
+          '<button class="btn btn-secondary" onclick="editarLavagem(' + item.id + ')">Editar</button>' +
+          '<button class="btn btn-success" onclick="abrirConfirmacaoPagamento(' + item.id + ')">Confirmar pagamento</button>' +
+          '<button class="btn btn-danger" onclick="removeItem(\'lavagens\',' + item.id + ')">Excluir</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function abrirConfirmacaoPagamento(id) {
+      state.pagamentoTargetId = id;
+      document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    function fecharModalPagamento() {
+      state.pagamentoTargetId = null;
+      document.getElementById('paymentModal').classList.add('hidden');
+    }
+
+    function confirmarPagamentoSelecionado(formaPagamento) {
+      const item = state.lavagens.find(x => x.id === state.pagamentoTargetId);
+      if (!item) {
+        fecharModalPagamento();
+        return;
+      }
+      item.formaPagamento = formaPagamento;
+      item.status = 'entregue';
+      saveDataOnline().then(() => {
+        fecharModalPagamento();
+        renderAll();
+        alert('Pagamento confirmado com sucesso.');
+      }).catch((error) => {
+        console.error('Erro ao confirmar pagamento', error);
+        alert('Não foi possível confirmar o pagamento.');
+      });
     }
 
     function renderLavagens() {
       const body = document.getElementById('lavagensBody');
+      const cards = document.getElementById('lavagensCards');
       body.innerHTML = '';
-      state.lavagens.forEach(item => { body.innerHTML += buildLavagemRow(item); });
+      if (cards) cards.innerHTML = '';
+
+      state.lavagens.forEach(item => {
+        body.innerHTML += buildLavagemRow(item);
+        if (cards) cards.innerHTML += buildLavagemCard(item);
+      });
 
       const filtroBody = document.getElementById('filtroLavagensBody');
-      if (filtroBody) {
-        filtroBody.innerHTML = '';
-        getFilteredLavagens().forEach(item => { filtroBody.innerHTML += buildLavagemRow(item); });
-      }
+      const filtroCards = document.getElementById('filtroLavagensCards');
+      if (filtroBody) filtroBody.innerHTML = '';
+      if (filtroCards) filtroCards.innerHTML = '';
+      getFilteredLavagens().forEach(item => {
+        if (filtroBody) filtroBody.innerHTML += buildLavagemRow(item);
+        if (filtroCards) filtroCards.innerHTML += buildLavagemCard(item);
+      });
     }
 
     function renderDespesas() {
@@ -1138,6 +1455,11 @@
       updatePaymentSummary();
       renderServiceSuggestions();
       updatePagamentoField();
+      const mobileToolbar = document.getElementById('mobileToolbar');
+      if (mobileToolbar) {
+        mobileToolbar.classList.toggle('hidden', window.innerWidth > 900);
+      }
+      syncMobileMenu();
     }
 
     function runSmokeTests() {
@@ -1155,6 +1477,14 @@
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) entrarSistema();
+    });
+
+    window.addEventListener('resize', function() {
+      syncMobileMenu();
+      const mobileToolbar = document.getElementById('mobileToolbar');
+      if (mobileToolbar) {
+        mobileToolbar.classList.toggle('hidden', window.innerWidth > 900);
+      }
     });
 
     document.addEventListener('DOMContentLoaded', async function() {
