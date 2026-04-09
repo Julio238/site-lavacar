@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LavaCar - Controle Administrativo</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: #0f172a;
+      --panel-2: #162033;
+      --card: #0c1628;
+      --line: #223149;
+      --text: #e5eefb;
+      --muted: #93a4bf;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #07101d 0%, #020617 100%);
+      color: var(--text);
+    }
+
+    .hidden { display: none !important; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(12, 22, 40, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+    }
+
+    .login-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-brand img,
+    .brand-logo {
+      width: 140px;
+      max-width: 100%;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .login-brand h1,
+    .brand-name {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .login-brand p,
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: rgba(10, 18, 32, 0.98);
+      border-right: 1px solid var(--line);
+      padding: 20px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .brand-role {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .menu-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .menu-btn.active,
+    .menu-btn:hover {
+      background: #11233b;
+      border-color: var(--accent);
+    }
+
+    .content { padding: 24px; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .topbar h1 { margin: 0; font-size: 30px; }
+    .top-actions,
+    .inline-actions,
+    .table-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--accent-2); color: #052e16; }
+    .btn-secondary { background: var(--accent); color: #082f49; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-warning { background: var(--warning); color: #111827; }
+    .btn-success { background: var(--success); color: #062a20; }
+
+    .cards,
+    .grid-form,
+    .summary-grid,
+    .subgrid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 22px; }
+    .grid-form { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 16px; }
+    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    .subgrid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+    .card,
+    .panel,
+    .summary-item,
+    .mini {
+      background: rgba(12, 22, 40, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .card-title { color: var(--muted); font-size: 13px; margin-bottom: 8px; text-transform: uppercase; }
+    .card-value,
+    .summary-item strong { font-size: 28px; font-weight: bold; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 13px; color: var(--muted); }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #081322;
+      color: var(--text);
+      padding: 12px;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input[readonly] { opacity: 0.85; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #14253f; }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .status-chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-aberto { background: rgba(56,189,248,0.18); color: #7dd3fc; }
+    .status-entregue { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+    .status-pendente { background: rgba(245,158,11,0.18); color: #fcd34d; }
+
+    .error-text { color: #fca5a5; font-size: 13px; min-height: 18px; margin-top: 8px; }
+
+    #dayBanner {
+      background: #22c55e;
+      color: #052e16;
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="./logo.png" alt="Logo LavaCar" onerror="this.style.display='none'" />
+        <h1>LavaCar</h1>
+        <p>Escolha o tipo de acesso e digite a senha</p>
+      </div>
+
+      <div class="grid-form">
+        <div class="field">
+          <label for="loginTipo">Tipo de acesso</label>
+          <select id="loginTipo">
+            <option value="adm">Administrador geral</option>
+            <option value="lavador">Lavador</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" placeholder="Digite a senha" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;" onclick="entrarSistema()">Entrar</button>
+      <div id="loginErro" class="error-text"></div>
+    </div>
+  </div>
+
+  <div id="appLayout" class="layout hidden">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="./logo.png" alt="Logo LavaCar" onerror="this.style.display='none'" />
+        <div class="brand-name">LavaCar</div>
+        <div class="brand-role" id="roleLabel">-</div>
+      </div>
+
+      <button class="menu-btn active" onclick="showTab('lavagens', this)">Lavagens</button>
+      <button class="menu-btn" onclick="showTab('filtros', this)">Filtros</button>
+      <button class="menu-btn admin-only" onclick="showTab('fechamento', this)">Fechamento Diário</button>
+      <button class="menu-btn admin-only" onclick="showTab('descontos', this)">Descontos</button>
+      <button class="menu-btn admin-only" onclick="showTab('despesas', this)">Despesas</button>
+      <button class="menu-btn admin-only" onclick="showTab('mes', this)">Total Mês</button>
+    </aside>
+
+    <main class="content">
+      <div id="dayBanner" class="hidden">
+        DIA ABERTO: <span id="dayBannerText"></span>
+      </div>
+
+      <div class="topbar">
+        <h1 id="pageTitle">Lavagens</h1>
+        <div class="top-actions">
+          <button class="btn btn-secondary admin-only" onclick="exportData()">Exportar JSON</button>
+          <button class="btn btn-secondary admin-only" onclick="exportExcel()">Exportar Excel</button>
+          <button class="btn btn-warning" onclick="logoutSistema()">Sair</button>
+          <button class="btn btn-danger admin-only" onclick="resetAllData()">Limpar dados</button>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Lavagens abertas</div>
+          <div class="card-value" id="kpiLavagens">0</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Entrada das lavagens</div>
+          <div class="card-value" id="kpiEntradas">R$ 0,00</div>
+        </div>
+        <div class="card admin-only">
+          <div class="card-title">Despesas</div>
+          <div class="card-value" id="kpiDespesas">R$ 0,00</div>
+        </div>
+        <div class="card admin-only">
+          <div class="card-title">Descontos</div>
+          <div class="card-value" id="kpiDescontos">R$ 0,00</div>
+        </div>
+      </div>
+
+      <section id="tab-lavagens" class="tab-section">
+        <div class="panel">
+          <h2>Lavagens</h2>
+          <div class="grid-form">
+            <div class="field">
+              <label for="dataOperacao">Data do dia</label>
+              <input type="date" id="dataOperacao" />
+            </div>
+            <div class="field inline-actions">
+              <button class="btn btn-secondary" id="btnAbrirDia" onclick="definirDataOperacao()">Abrir dia</button>
+              <button class="btn btn-warning" id="btnFecharDiaAtual" onclick="limparDataOperacao()">Fechar dia atual</button>
+            </div>
+            <div class="field">
+              <label for="dataAtualExibicao">Dia aberto</label>
+              <input type="text" id="dataAtualExibicao" readonly placeholder="Nenhum dia aberto" />
+            </div>
+          </div>
+          <p class="muted">Você define a data uma vez. Depois, todas as lavagens novas entram automaticamente nesse dia.</p>
+          <p class="muted" id="dayStatusText"></p>
+
+          <div class="grid-form">
+            <div class="field">
+              <label for="modeloLavagem">Modelo</label>
+              <input type="text" id="modeloLavagem" placeholder="Ex: Onix, Civic" />
+            </div>
+            <div class="field">
+              <label for="placaLavagem">Placa</label>
+              <input type="text" id="placaLavagem" placeholder="ABC1D23" />
+            </div>
+            <div class="field">
+              <label for="servicoLavagem">Serviço</label>
+              <input type="text" id="servicoLavagem" list="servicosList" placeholder="Descreva o serviço" />
+              <datalist id="servicosList"></datalist>
+            </div>
+            <div class="field">
+              <label for="statusLavagem">Status</label>
+              <select id="statusLavagem">
+                <option value="aberto">Em andamento</option>
+                <option value="entregue">Entregue</option>
+                <option value="pendente">Pagamento pendente</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="formaPagamentoLavagem">Forma de pagamento</label>
+              <select id="formaPagamentoLavagem">
+                <option value="">Selecione ao entregar</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Débito">Débito</option>
+                <option value="Crédito">Crédito</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="horasLavagem">Hora de entrega</label>
+              <input type="time" id="horasLavagem" step="60" />
+            </div>
+            <div class="field">
+              <label for="totalLavagem">Total</label>
+              <input type="number" id="totalLavagem" min="0" step="0.01" placeholder="0,00" />
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" id="btnSalvarLavagem" onclick="saveLavagem()">Adicionar lavagem</button>
+            <button class="btn btn-warning hidden" id="btnCancelarEdicao" onclick="cancelarEdicaoLavagem()">Cancelar edição</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Resumo por pagamento</h2>
+          <div class="summary-grid">
+            <div class="summary-item"><span>Dinheiro</span><strong id="sumDinheiro">R$ 0,00</strong></div>
+            <div class="summary-item"><span>Pix</span><strong id="sumPix">R$ 0,00</strong></div>
+            <div class="summary-item"><span>Débito</span><strong id="sumDebito">R$ 0,00</strong></div>
+            <div class="summary-item"><span>Crédito</span><strong id="sumCredito">R$ 0,00</strong></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Lista de lavagens</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Serviço</th>
+                <th>Status</th>
+                <th>Pagamento</th>
+                <th>Entrega</th>
+                <th>Total</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lavagensBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-filtros" class="tab-section hidden">
+        <div class="panel">
+          <h2>Filtros</h2>
+          <p class="muted">Use os filtros para encontrar veículos abertos, pendentes ou entregues e finalizar os que ainda estão em andamento na hora da entrega.</p>
+          <div class="grid-form">
+            <div class="field">
+              <label for="filtroDataLavagens">Data</label>
+              <input type="date" id="filtroDataLavagens" />
+            </div>
+            <div class="field">
+              <label for="filtroStatusLavagens">Status</label>
+              <select id="filtroStatusLavagens">
+                <option value="">Todos</option>
+                <option value="aberto">Em andamento</option>
+                <option value="entregue">Entregue</option>
+                <option value="pendente">Pagamento pendente</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filtroPagamentoLavagens">Pagamento</label>
+              <select id="filtroPagamentoLavagens">
+                <option value="">Todos</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Débito">Débito</option>
+                <option value="Crédito">Crédito</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filtroTextoLavagens">Busca geral</label>
+              <input type="text" id="filtroTextoLavagens" placeholder="Modelo, placa ou serviço" />
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-secondary" onclick="aplicarFiltroLavagens()">Aplicar filtro</button>
+            <button class="btn btn-warning" onclick="limparFiltroLavagens()">Limpar filtro</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Resultado do filtro</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Serviço</th>
+                <th>Status</th>
+                <th>Pagamento</th>
+                <th>Entrega</th>
+                <th>Total</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="filtroLavagensBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-fechamento" class="tab-section hidden admin-only-section">
+        <div class="panel">
+          <h2>Fechamento Diário</h2>
+          <div class="grid-form">
+            <div class="field">
+              <label for="dataFechamento">Data do fechamento</label>
+              <input type="date" id="dataFechamento" />
+            </div>
+          </div>
+          <button class="btn btn-warning" onclick="fecharDia()">Fechar dia</button>
+          <div class="subgrid">
+            <div class="mini">Dinheiro: <strong id="fechDinheiro">R$ 0,00</strong></div>
+            <div class="mini">Pix: <strong id="fechPix">R$ 0,00</strong></div>
+            <div class="mini">Débito: <strong id="fechDebito">R$ 0,00</strong></div>
+            <div class="mini">Crédito: <strong id="fechCredito">R$ 0,00</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-descontos" class="tab-section hidden admin-only-section">
+        <div class="panel">
+          <h2>Descontos</h2>
+          <div class="grid-form">
+            <div class="field"><label for="dataDesconto">Data</label><input type="date" id="dataDesconto" /></div>
+            <div class="field"><label for="nomeFuncionario">Funcionário</label><input type="text" id="nomeFuncionario" /></div>
+            <div class="field"><label for="motivoDesconto">Motivo</label><input type="text" id="motivoDesconto" /></div>
+            <div class="field"><label for="valorDesconto">Valor</label><input type="number" id="valorDesconto" min="0" step="0.01" /></div>
+          </div>
+          <button class="btn btn-primary" onclick="addDesconto()">Adicionar desconto</button>
+        </div>
+        <div class="panel"><table><thead><tr><th>Data</th><th>Funcionário</th><th>Motivo</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="descontosBody"></tbody></table></div>
+      </section>
+
+      <section id="tab-despesas" class="tab-section hidden admin-only-section">
+        <div class="panel">
+          <h2>Despesas</h2>
+          <div class="grid-form">
+            <div class="field"><label for="dataDespesa">Data</label><input type="date" id="dataDespesa" /></div>
+            <div class="field"><label for="categoriaDespesa">Categoria</label><input type="text" id="categoriaDespesa" /></div>
+            <div class="field"><label for="descricaoDespesa">Descrição</label><input type="text" id="descricaoDespesa" /></div>
+            <div class="field"><label for="valorDespesa">Valor</label><input type="number" id="valorDespesa" min="0" step="0.01" /></div>
+          </div>
+          <button class="btn btn-primary" onclick="addDespesa()">Adicionar despesa</button>
+        </div>
+        <div class="panel"><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="despesasBody"></tbody></table></div>
+      </section>
+
+      <section id="tab-mes" class="tab-section hidden admin-only-section">
+        <div class="panel">
+          <h2>Total Mês</h2>
+          <div class="top-actions">
+            <span>Dias fechados: <strong id="relDiasFechados">0</strong></span>
+            <span>Entradas mês: <strong id="relEntradasMes">R$ 0,00</strong></span>
+            <span>Despesas mês: <strong id="relDespesasMes">R$ 0,00</strong></span>
+            <span>Descontos mês: <strong id="relDescontosMes">R$ 0,00</strong></span>
+            <span>Saldo mês: <strong id="relSaldoMes">R$ 0,00</strong></span>
+          </div>
+        </div>
+        <div class="panel"><table><thead><tr><th>Data</th><th>Qtd. Lavagens</th><th>Dinheiro</th><th>Pix</th><th>Débito</th><th>Crédito</th><th>Total</th></tr></thead><tbody id="mesBody"></tbody></table></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCur8_hAM_Z5c9aASH4nl6Goch03wSYOFY",
+      authDomain: "hrlavacar-6137d.firebaseapp.com",
+      projectId: "hrlavacar-6137d",
+      storageBucket: "hrlavacar-6137d.firebasestorage.app",
+      messagingSenderId: "99820337821",
+      appId: "1:99820337821:web:e03a5b5135763539f3b274"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const AUTH_KEY = 'lavacar_admin_auth_v3';
+    const SESSION_KEY = 'lavacar_admin_session_v3';
+    const SERVICES_KEY = 'lavacar_servicos_sugeridos_v1';
+    const FIRESTORE_COLLECTION = 'lavacar';
+    const FIRESTORE_DOC = 'dados';
+
+    const defaultAuth = {
+      adm: { senha: '4321', label: 'Administrador geral' },
+      lavador: { senha: '1234', label: 'Lavador' }
+    };
+
+    const state = {
+      currentRole: 'adm',
+      dataOperacao: '',
+      lavagens: [],
+      despesas: [],
+      descontos: [],
+      fechamentos: [],
+      editingLavagemId: null,
+      filtros: { data: '', status: '', pagamento: '', texto: '' }
+    };
+
+    let firestoreReady = false;
+
+    function formatBRL(value) {
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getAuth() {
+      const saved = localStorage.getItem(AUTH_KEY);
+      if (!saved) {
+        localStorage.setItem(AUTH_KEY, JSON.stringify(defaultAuth));
+        return defaultAuth;
+      }
+      try {
+        const parsed = JSON.parse(saved);
+        if (!parsed.adm || !parsed.lavador) throw new Error('auth inválido');
+        return parsed;
+      } catch {
+        localStorage.setItem(AUTH_KEY, JSON.stringify(defaultAuth));
+        return defaultAuth;
+      }
+    }
+
+    async function ensureFirestoreDocument() {
+      const ref = db.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC);
+      const snap = await ref.get();
+      if (!snap.exists) {
+        await ref.set({
+          dataOperacao: '',
+          lavagens: [],
+          despesas: [],
+          descontos: [],
+          fechamentos: []
+        });
+      }
+    }
+
+    async function saveDataOnline() {
+      await db.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC).set({
+        dataOperacao: state.dataOperacao,
+        lavagens: state.lavagens,
+        despesas: state.despesas,
+        descontos: state.descontos,
+        fechamentos: state.fechamentos
+      });
+    }
+
+    async function loadDataOnline() {
+      await ensureFirestoreDocument();
+      const doc = await db.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC).get();
+      if (doc.exists) {
+        const data = doc.data() || {};
+        state.dataOperacao = data.dataOperacao || '';
+        state.lavagens = Array.isArray(data.lavagens) ? data.lavagens : [];
+        state.despesas = Array.isArray(data.despesas) ? data.despesas : [];
+        state.descontos = Array.isArray(data.descontos) ? data.descontos : [];
+        state.fechamentos = Array.isArray(data.fechamentos) ? data.fechamentos : [];
+        firestoreReady = true;
+        renderAll();
+      }
+    }
+
+    function realtimeUpdate() {
+      db.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC).onSnapshot((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data() || {};
+        state.dataOperacao = data.dataOperacao || '';
+        state.lavagens = Array.isArray(data.lavagens) ? data.lavagens : [];
+        state.despesas = Array.isArray(data.despesas) ? data.despesas : [];
+        state.descontos = Array.isArray(data.descontos) ? data.descontos : [];
+        state.fechamentos = Array.isArray(data.fechamentos) ? data.fechamentos : [];
+        firestoreReady = true;
+        renderAll();
+      }, (error) => {
+        console.error('Erro no tempo real do Firestore', error);
+      });
+    }
+
+    function entrarSistema() {
+      const tipo = document.getElementById('loginTipo').value;
+      const senha = document.getElementById('loginSenha').value.trim();
+      const auth = getAuth();
+      if (!senha) {
+        document.getElementById('loginErro').textContent = 'Preencha a senha.';
+        return;
+      }
+      if (senha === auth[tipo].senha) {
+        state.currentRole = tipo;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ logged: true, role: tipo }));
+        document.getElementById('loginErro').textContent = '';
+        mostrarSistema();
+        return;
+      }
+      document.getElementById('loginErro').textContent = 'Senha incorreta.';
+    }
+
+    function logoutSistema() {
+      sessionStorage.removeItem(SESSION_KEY);
+      document.getElementById('appLayout').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginSenha').value = '';
+      document.getElementById('loginTipo').value = 'adm';
+    }
+
+    function verificarSessao() {
+      try {
+        const raw = sessionStorage.getItem(SESSION_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.logged) {
+          state.currentRole = parsed.role || 'adm';
+          mostrarSistema();
+        }
+      } catch (e) {
+        console.error('Erro de sessão', e);
+      }
+    }
+
+    function mostrarSistema() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appLayout').classList.remove('hidden');
+      applyRolePermissions();
+      renderAll();
+    }
+
+    function applyRolePermissions() {
+      const isAdm = state.currentRole === 'adm';
+      document.getElementById('roleLabel').textContent = isAdm ? 'Administrador geral' : 'Lavador';
+      document.querySelectorAll('.admin-only, .admin-only-section').forEach(el => {
+        el.classList.toggle('hidden', !isAdm);
+      });
+
+      const inputData = document.getElementById('dataOperacao');
+      const btnAbrir = document.getElementById('btnAbrirDia');
+      const btnFechar = document.getElementById('btnFecharDiaAtual');
+      if (inputData) inputData.disabled = !isAdm;
+      if (btnAbrir) { btnAbrir.style.display = isAdm ? 'inline-block' : 'none'; btnAbrir.disabled = !isAdm; }
+      if (btnFechar) { btnFechar.style.display = isAdm ? 'inline-block' : 'none'; btnFechar.disabled = !isAdm; }
+
+      if (!isAdm && ['fechamento','descontos','despesas','mes'].includes(getVisibleTab())) {
+        showTab('lavagens', document.querySelector('.menu-btn'));
+      }
+    }
+
+    function getVisibleTab() {
+      const sections = document.querySelectorAll('.tab-section');
+      for (const section of sections) {
+        if (!section.classList.contains('hidden')) return section.id.replace('tab-', '');
+      }
+      return 'lavagens';
+    }
+
+    function showTab(tab, btn) {
+      if (state.currentRole !== 'adm' && ['fechamento','descontos','despesas','mes'].includes(tab)) tab = 'lavagens';
+      document.querySelectorAll('.tab-section').forEach(section => section.classList.add('hidden'));
+      const target = document.getElementById('tab-' + tab);
+      if (target) target.classList.remove('hidden');
+      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const titles = { lavagens:'Lavagens', filtros:'Filtros', fechamento:'Fechamento Diário', descontos:'Descontos', despesas:'Despesas', mes:'Total Mês' };
+      document.getElementById('pageTitle').textContent = titles[tab] || 'Lavagens';
+      if (tab === 'fechamento') updatePreviaFechamento();
+    }
+
+    async function definirDataOperacao() {
+      if (state.currentRole !== 'adm') return alert('Somente o administrador pode abrir o dia.');
+      const data = document.getElementById('dataOperacao').value;
+      if (!data) return alert('Selecione a data para abrir o dia.');
+      state.dataOperacao = data;
+      await saveDataOnline();
+      renderAll();
+      alert('Dia aberto com sucesso.');
+    }
+
+    async function limparDataOperacao() {
+      if (state.currentRole !== 'adm') return alert('Somente o administrador pode fechar o dia atual.');
+      state.dataOperacao = '';
+      await saveDataOnline();
+      renderAll();
+    }
+
+    function updatePagamentoField() {
+      const status = document.getElementById('statusLavagem').value;
+      const pagamento = document.getElementById('formaPagamentoLavagem');
+      pagamento.disabled = status === 'aberto';
+      if (status === 'aberto') pagamento.value = '';
+    }
+
+    function clearLavagemForm() {
+      document.getElementById('modeloLavagem').value = '';
+      document.getElementById('placaLavagem').value = '';
+      document.getElementById('servicoLavagem').value = '';
+      document.getElementById('statusLavagem').value = 'aberto';
+      document.getElementById('formaPagamentoLavagem').value = '';
+      document.getElementById('horasLavagem').value = '';
+      document.getElementById('totalLavagem').value = '';
+      updatePagamentoField();
+    }
+
+    async function saveLavagem() {
+      if (!firestoreReady) return alert('Aguarde o sistema conectar ao banco online.');
+      if (!state.dataOperacao) return alert('Aguardando o administrador abrir o dia.');
+      const modelo = document.getElementById('modeloLavagem').value.trim();
+      const placa = document.getElementById('placaLavagem').value.trim().toUpperCase();
+      const servico = document.getElementById('servicoLavagem').value.trim();
+      const status = document.getElementById('statusLavagem').value;
+      const formaPagamento = document.getElementById('formaPagamentoLavagem').value;
+      const horas = document.getElementById('horasLavagem').value;
+      const total = parseFloat(document.getElementById('totalLavagem').value || 0);
+
+      if (!modelo || !placa || !servico || !horas || total <= 0) return alert('Preencha modelo, placa, serviço, hora de entrega e total.');
+      if (status === 'entregue' && !formaPagamento) return alert('Escolha a forma de pagamento quando o veículo for entregue.');
+
+      const payload = {
+        data: state.dataOperacao,
+        modelo,
+        placa,
+        servico,
+        status,
+        formaPagamento: status === 'aberto' ? '' : formaPagamento,
+        horas,
+        total
+      };
+
+      if (state.editingLavagemId) {
+        const item = state.lavagens.find(x => x.id === state.editingLavagemId);
+        if (item) Object.assign(item, payload);
+      } else {
+        state.lavagens.push(Object.assign({ id: Date.now() }, payload));
+      }
+
+      saveSuggestedService(servico);
+      await saveDataOnline();
+      cancelarEdicaoLavagem(false);
+      clearLavagemForm();
+      renderAll();
+    }
+
+    function editarLavagem(id) {
+      const item = state.lavagens.find(x => x.id === id);
+      if (!item) return;
+      state.editingLavagemId = id;
+      document.getElementById('modeloLavagem').value = item.modelo;
+      document.getElementById('placaLavagem').value = item.placa;
+      document.getElementById('servicoLavagem').value = item.servico;
+      document.getElementById('statusLavagem').value = item.status || 'aberto';
+      document.getElementById('formaPagamentoLavagem').value = item.formaPagamento || '';
+      document.getElementById('horasLavagem').value = item.horas;
+      document.getElementById('totalLavagem').value = item.total;
+      document.getElementById('btnSalvarLavagem').textContent = 'Salvar edição';
+      document.getElementById('btnCancelarEdicao').classList.remove('hidden');
+      updatePagamentoField();
+      showTab('lavagens', document.querySelector('.menu-btn'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicaoLavagem(clear = true) {
+      state.editingLavagemId = null;
+      document.getElementById('btnSalvarLavagem').textContent = 'Adicionar lavagem';
+      document.getElementById('btnCancelarEdicao').classList.add('hidden');
+      if (clear) clearLavagemForm();
+    }
+
+    function aplicarFiltroLavagens() {
+      state.filtros.data = document.getElementById('filtroDataLavagens').value || '';
+      state.filtros.status = document.getElementById('filtroStatusLavagens').value || '';
+      state.filtros.pagamento = document.getElementById('filtroPagamentoLavagens').value || '';
+      state.filtros.texto = document.getElementById('filtroTextoLavagens').value.trim().toLowerCase();
+      renderLavagens();
+      updatePaymentSummary();
+    }
+
+    function limparFiltroLavagens() {
+      state.filtros = { data:'', status:'', pagamento:'', texto:'' };
+      document.getElementById('filtroDataLavagens').value = '';
+      document.getElementById('filtroStatusLavagens').value = '';
+      document.getElementById('filtroPagamentoLavagens').value = '';
+      document.getElementById('filtroTextoLavagens').value = '';
+      renderLavagens();
+      updatePaymentSummary();
+    }
+
+    function getFilteredLavagens() {
+      return state.lavagens.filter(item => {
+        const okData = !state.filtros.data || item.data === state.filtros.data;
+        const okStatus = !state.filtros.status || item.status === state.filtros.status;
+        const okPagamento = !state.filtros.pagamento || item.formaPagamento === state.filtros.pagamento;
+        const text = (item.modelo + ' ' + item.placa + ' ' + item.servico).toLowerCase();
+        const okTexto = !state.filtros.texto || text.includes(state.filtros.texto);
+        return okData && okStatus && okPagamento && okTexto;
+      });
+    }
+
+    function statusLabel(status) {
+      if (status === 'entregue') return 'Entregue';
+      if (status === 'pendente') return 'Pagamento pendente';
+      return 'Em andamento';
+    }
+
+    function statusClass(status) {
+      if (status === 'entregue') return 'status-entregue';
+      if (status === 'pendente') return 'status-pendente';
+      return 'status-aberto';
+    }
+
+    function buildLavagemRow(item) {
+      return '<tr>' +
+        '<td>' + escapeHtml(item.data) + '</td>' +
+        '<td>' + escapeHtml(item.modelo) + '</td>' +
+        '<td>' + escapeHtml(item.placa) + '</td>' +
+        '<td>' + escapeHtml(item.servico) + '</td>' +
+        '<td><span class="status-chip ' + statusClass(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span></td>' +
+        '<td>' + escapeHtml(item.formaPagamento || '-') + '</td>' +
+        '<td>' + escapeHtml(item.horas) + '</td>' +
+        '<td>' + escapeHtml(formatBRL(item.total)) + '</td>' +
+        '<td><div class="table-actions"><button class="btn btn-secondary" onclick="editarLavagem(' + item.id + ')">Editar</button><button class="btn btn-danger" onclick="removeItem(\'lavagens\',' + item.id + ')">Excluir</button></div></td>' +
+        '</tr>';
+    }
+
+    function renderLavagens() {
+      const body = document.getElementById('lavagensBody');
+      body.innerHTML = '';
+      state.lavagens.forEach(item => { body.innerHTML += buildLavagemRow(item); });
+
+      const filtroBody = document.getElementById('filtroLavagensBody');
+      if (filtroBody) {
+        filtroBody.innerHTML = '';
+        getFilteredLavagens().forEach(item => { filtroBody.innerHTML += buildLavagemRow(item); });
+      }
+    }
+
+    function renderDespesas() {
+      const body = document.getElementById('despesasBody');
+      body.innerHTML = '';
+      state.despesas.forEach(item => {
+        body.innerHTML += '<tr><td>' + escapeHtml(item.data) + '</td><td>' + escapeHtml(item.categoria) + '</td><td>' + escapeHtml(item.descricao) + '</td><td>' + escapeHtml(formatBRL(item.valor)) + '</td><td><button class="btn btn-danger" onclick="removeItem(\'despesas\',' + item.id + ')">Excluir</button></td></tr>';
+      });
+    }
+
+    function renderDescontos() {
+      const body = document.getElementById('descontosBody');
+      body.innerHTML = '';
+      state.descontos.forEach(item => {
+        body.innerHTML += '<tr><td>' + escapeHtml(item.data) + '</td><td>' + escapeHtml(item.funcionario) + '</td><td>' + escapeHtml(item.motivo) + '</td><td>' + escapeHtml(formatBRL(item.valor)) + '</td><td><button class="btn btn-danger" onclick="removeItem(\'descontos\',' + item.id + ')">Excluir</button></td></tr>';
+      });
+    }
+
+    function updatePaymentSummary() {
+      let dinheiro = 0, pix = 0, debito = 0, credito = 0;
+      getFilteredLavagens().forEach(item => {
+        if (item.formaPagamento === 'Dinheiro') dinheiro += Number(item.total || 0);
+        if (item.formaPagamento === 'Pix') pix += Number(item.total || 0);
+        if (item.formaPagamento === 'Débito') debito += Number(item.total || 0);
+        if (item.formaPagamento === 'Crédito') credito += Number(item.total || 0);
+      });
+      document.getElementById('sumDinheiro').textContent = formatBRL(dinheiro);
+      document.getElementById('sumPix').textContent = formatBRL(pix);
+      document.getElementById('sumDebito').textContent = formatBRL(debito);
+      document.getElementById('sumCredito').textContent = formatBRL(credito);
+    }
+
+    function updatePreviaFechamento() {
+      const data = document.getElementById('dataFechamento').value;
+      let dinheiro = 0, pix = 0, debito = 0, credito = 0;
+      const itens = state.lavagens.filter(item => (!data || item.data === data) && item.status !== 'aberto');
+      itens.forEach(item => {
+        if (item.formaPagamento === 'Dinheiro') dinheiro += Number(item.total || 0);
+        if (item.formaPagamento === 'Pix') pix += Number(item.total || 0);
+        if (item.formaPagamento === 'Débito') debito += Number(item.total || 0);
+        if (item.formaPagamento === 'Crédito') credito += Number(item.total || 0);
+      });
+      document.getElementById('fechDinheiro').textContent = formatBRL(dinheiro);
+      document.getElementById('fechPix').textContent = formatBRL(pix);
+      document.getElementById('fechDebito').textContent = formatBRL(debito);
+      document.getElementById('fechCredito').textContent = formatBRL(credito);
+    }
+
+    async function fecharDia() {
+      if (state.currentRole !== 'adm') return alert('Somente o administrador pode fechar o dia.');
+      const data = document.getElementById('dataFechamento').value;
+      if (!data) return alert('Selecione a data para fechar o dia.');
+      const itens = state.lavagens.filter(item => item.data === data && item.status !== 'aberto');
+      if (!itens.length) return alert('Não há lavagens fecháveis nessa data.');
+      if (state.fechamentos.some(item => item.data === data)) return alert('Essa data já foi fechada.');
+      let dinheiro = 0, pix = 0, debito = 0, credito = 0, total = 0;
+      itens.forEach(item => {
+        total += Number(item.total || 0);
+        if (item.formaPagamento === 'Dinheiro') dinheiro += Number(item.total || 0);
+        if (item.formaPagamento === 'Pix') pix += Number(item.total || 0);
+        if (item.formaPagamento === 'Débito') debito += Number(item.total || 0);
+        if (item.formaPagamento === 'Crédito') credito += Number(item.total || 0);
+      });
+      state.fechamentos.push({ id: Date.now(), data, quantidade: itens.length, dinheiro, pix, debito, credito, total });
+      state.lavagens = state.lavagens.filter(item => !(item.data === data && item.status !== 'aberto'));
+      if (state.dataOperacao === data && !state.lavagens.some(item => item.data === data)) state.dataOperacao = '';
+      await saveDataOnline();
+      clearLavagemForm();
+      renderAll();
+      alert('Dia fechado e lançado em Total Mês.');
+    }
+
+    async function addDespesa() {
+      const data = document.getElementById('dataDespesa').value;
+      const categoria = document.getElementById('categoriaDespesa').value.trim();
+      const descricao = document.getElementById('descricaoDespesa').value.trim();
+      const valor = parseFloat(document.getElementById('valorDespesa').value || 0);
+      if (!data || !categoria || !descricao || valor <= 0) return alert('Preencha os campos da despesa.');
+      state.despesas.push({ id: Date.now(), data, categoria, descricao, valor });
+      await saveDataOnline();
+      renderAll();
+    }
+
+    async function addDesconto() {
+      const data = document.getElementById('dataDesconto').value;
+      const funcionario = document.getElementById('nomeFuncionario').value.trim();
+      const motivo = document.getElementById('motivoDesconto').value.trim();
+      const valor = parseFloat(document.getElementById('valorDesconto').value || 0);
+      if (!data || !funcionario || !motivo || valor <= 0) return alert('Preencha os campos do desconto.');
+      state.descontos.push({ id: Date.now(), data, funcionario, motivo, valor });
+      await saveDataOnline();
+      renderAll();
+    }
+
+    async function removeItem(type, id) {
+      state[type] = state[type].filter(item => item.id !== id);
+      await saveDataOnline();
+      renderAll();
+    }
+
+    function renderMes() {
+      const body = document.getElementById('mesBody');
+      body.innerHTML = '';
+      state.fechamentos.forEach(item => {
+        body.innerHTML += '<tr><td>' + escapeHtml(item.data) + '</td><td>' + escapeHtml(item.quantidade) + '</td><td>' + escapeHtml(formatBRL(item.dinheiro)) + '</td><td>' + escapeHtml(formatBRL(item.pix)) + '</td><td>' + escapeHtml(formatBRL(item.debito)) + '</td><td>' + escapeHtml(formatBRL(item.credito)) + '</td><td>' + escapeHtml(formatBRL(item.total)) + '</td></tr>';
+      });
+    }
+
+    function getSuggestedServices() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(SERVICES_KEY) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSuggestedService(servico) {
+      const value = String(servico || '').trim();
+      if (!value) return;
+      const list = getSuggestedServices();
+      if (!list.some(item => item.toLowerCase() === value.toLowerCase())) {
+        list.push(value);
+        localStorage.setItem(SERVICES_KEY, JSON.stringify(list));
+      }
+      renderServiceSuggestions();
+    }
+
+    function renderServiceSuggestions() {
+      const datalist = document.getElementById('servicosList');
+      const base = ['Lavagem simples','Lavagem completa','Lavagem detalhada','Higienização interna','Polimento'];
+      const merged = [...base, ...getSuggestedServices()];
+      const unique = [...new Map(merged.map(item => [item.toLowerCase(), item])).values()];
+      datalist.innerHTML = unique.map(item => '<option value="' + escapeHtml(item) + '"></option>').join('');
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify({ dataOperacao: state.dataOperacao, lavagens: state.lavagens, despesas: state.despesas, descontos: state.descontos, fechamentos: state.fechamentos }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lavacar-dados.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportExcel() {
+      const rowsLavagens = [['Data','Modelo','Placa','Serviço','Status','Pagamento','Entrega','Total'], ...state.lavagens.map(item => [item.data, item.modelo, item.placa, item.servico, statusLabel(item.status), item.formaPagamento || '', item.horas, item.total])];
+      const rowsDespesas = [['Data','Categoria','Descrição','Valor'], ...state.despesas.map(item => [item.data, item.categoria, item.descricao, item.valor])];
+      const rowsDescontos = [['Data','Funcionário','Motivo','Valor'], ...state.descontos.map(item => [item.data, item.funcionario, item.motivo, item.valor])];
+      const rowsFechamentos = [['Data','Qtd. Lavagens','Dinheiro','Pix','Débito','Crédito','Total'], ...state.fechamentos.map(item => [item.data, item.quantidade, item.dinheiro, item.pix, item.debito, item.credito, item.total])];
+      const toSheet = rows => rows.map(row => row.map(cell => '"' + String(cell ?? '').replace(/"/g, '""') + '"').join(';')).join('');
+      const content = ['### LAVAGENS ###', toSheet(rowsLavagens), '', '### DESPESAS ###', toSheet(rowsDespesas), '', '### DESCONTOS ###', toSheet(rowsDescontos), '', '### FECHAMENTOS ###', toSheet(rowsFechamentos)].join('');
+      const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lavacar-relatorio.xls';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function resetAllData() {
+      if (!confirm('Deseja apagar todos os dados salvos?')) return;
+      state.dataOperacao = '';
+      state.lavagens = [];
+      state.despesas = [];
+      state.descontos = [];
+      state.fechamentos = [];
+      state.editingLavagemId = null;
+      state.filtros = { data:'', status:'', pagamento:'', texto:'' };
+      await saveDataOnline();
+      clearLavagemForm();
+      renderAll();
+    }
+
+    function updateSummary() {
+      const entradasAbertas = state.lavagens.reduce((sum, item) => sum + Number(item.total || 0), 0);
+      const despesasAbertas = state.despesas.reduce((sum, item) => sum + Number(item.valor || 0), 0);
+      const descontosAbertos = state.descontos.reduce((sum, item) => sum + Number(item.valor || 0), 0);
+      const entradasMes = state.fechamentos.reduce((sum, item) => sum + Number(item.total || 0), 0);
+      const despesasMes = state.despesas.reduce((sum, item) => sum + Number(item.valor || 0), 0);
+      const descontosMes = state.descontos.reduce((sum, item) => sum + Number(item.valor || 0), 0);
+
+      document.getElementById('kpiLavagens').textContent = String(state.lavagens.length);
+      document.getElementById('kpiEntradas').textContent = formatBRL(entradasAbertas);
+      const kpiD = document.getElementById('kpiDespesas'); if (kpiD) kpiD.textContent = formatBRL(despesasAbertas);
+      const kpiDc = document.getElementById('kpiDescontos'); if (kpiDc) kpiDc.textContent = formatBRL(descontosAbertos);
+      const rel1 = document.getElementById('relDiasFechados'); if (rel1) rel1.textContent = String(state.fechamentos.length);
+      const rel2 = document.getElementById('relEntradasMes'); if (rel2) rel2.textContent = formatBRL(entradasMes);
+      const rel3 = document.getElementById('relDespesasMes'); if (rel3) rel3.textContent = formatBRL(despesasMes);
+      const rel4 = document.getElementById('relDescontosMes'); if (rel4) rel4.textContent = formatBRL(descontosMes);
+      const rel5 = document.getElementById('relSaldoMes'); if (rel5) rel5.textContent = formatBRL(entradasMes - despesasMes - descontosMes);
+
+      document.getElementById('dataAtualExibicao').value = state.dataOperacao || 'Nenhum dia aberto';
+      document.getElementById('dataOperacao').value = state.dataOperacao || '';
+      document.getElementById('filtroDataLavagens').value = state.filtros.data || '';
+      document.getElementById('filtroStatusLavagens').value = state.filtros.status || '';
+      document.getElementById('filtroPagamentoLavagens').value = state.filtros.pagamento || '';
+      document.getElementById('filtroTextoLavagens').value = state.filtros.texto || '';
+
+      document.getElementById('dayStatusText').textContent = state.currentRole === 'adm'
+        ? (state.dataOperacao ? 'Dia aberto para todos os usuários.' : 'Abra o dia para liberar o lançamento de veículos.')
+        : (state.dataOperacao ? 'Dia aberto pelo administrador.' : 'Aguardando o administrador abrir o dia.');
+
+      const banner = document.getElementById('dayBanner');
+      const bannerText = document.getElementById('dayBannerText');
+      if (state.dataOperacao) {
+        banner.classList.remove('hidden');
+        bannerText.textContent = state.dataOperacao;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderAll() {
+      renderLavagens();
+      renderDespesas();
+      renderDescontos();
+      renderMes();
+      updateSummary();
+      updatePaymentSummary();
+      renderServiceSuggestions();
+      updatePagamentoField();
+    }
+
+    function runSmokeTests() {
+      console.assert(statusLabel('pendente') === 'Pagamento pendente', 'statusLabel pendente');
+      console.assert(['adm', 'lavador'].includes(state.currentRole), 'role válido');
+      console.assert(Array.isArray(getSuggestedServices()), 'serviços sugeridos array');
+      console.assert(typeof escapeHtml('<a>') === 'string', 'escapeHtml retorna string');
+      console.assert(document.getElementById('btnAbrirDia') !== null, 'botão abrir dia deve existir');
+    }
+
+    document.addEventListener('change', function(e) {
+      if (e.target && e.target.id === 'statusLavagem') updatePagamentoField();
+      if (e.target && e.target.id === 'dataFechamento') updatePreviaFechamento();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) entrarSistema();
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      document.getElementById('loginTipo').value = 'adm';
+      getAuth();
+      runSmokeTests();
+      try {
+        await loadDataOnline();
+        realtimeUpdate();
+      } catch (error) {
+        console.error('Erro ao conectar no Firebase', error);
+        document.getElementById('loginErro').textContent = 'Erro ao conectar no banco online. Verifique as regras do Firestore.';
+      }
+      verificarSessao();
+    });
+  </script>
+</body>
+</html>
